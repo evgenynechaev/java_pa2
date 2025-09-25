@@ -24,4 +24,11 @@ public abstract class Entity {
     public void setHp(int hp) {
         this.hp = hp;
     }
+
+    public abstract String describe();
+
+    public void takeHit(int hit) {
+        this.hp -= hit;
+    }
+
 }

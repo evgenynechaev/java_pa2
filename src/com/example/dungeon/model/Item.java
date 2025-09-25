@@ -7,9 +7,16 @@ public abstract class Item {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public String getName() {
         return name;
     }
+
+    public abstract String getItemClassName();
 
     public abstract void apply(GameState ctx);
 }

@@ -29,7 +29,7 @@ public class SaveLoad {
         }
     }
 
-    public static void load(GameState s) {
+    public static void load(GameState s, List<Room> rooms) {
         if (!Files.exists(SAVE)) {
             System.out.println("Сохранение не найдено.");
             return;
@@ -41,10 +41,10 @@ public class SaveLoad {
                 if (parts.length == 2) map.put(parts[0], parts[1]);
             }
             Player p = s.getPlayer();
-            String[] pp = map.getOrDefault("player", "player;Hero;10;3").split(";");
-            p.setName(pp[1]);
-            p.setHp(Integer.parseInt(pp[2]));
-            p.setAttack(Integer.parseInt(pp[3]));
+            String[] pp = map.getOrDefault("player", "Hero;10;3").split(";");
+            p.setName(pp[0]);
+            p.setHp(Integer.parseInt(pp[1]));
+            p.setAttack(Integer.parseInt(pp[2]));
             p.getInventory().clear();
             String inv = map.getOrDefault("inventory", "");
             if (!inv.isBlank()) for (String tok : inv.split(",")) {
@@ -58,7 +58,10 @@ public class SaveLoad {
                     }
                 }
             }
-            System.out.println("Игра загружена (упрощённо).");
+            String roomName = map.getOrDefault("room", "Площадь");
+            Optional<Room> room = rooms.stream().filter(x -> x.getName().equalsIgnoreCase(roomName)).findFirst();
+            room.ifPresent(s::setCurrent);
+            System.out.println("Игра загружена.");
         } catch (IOException e) {
             throw new UncheckedIOException("Не удалось загрузить игру", e);
         }

@@ -1,11 +1,18 @@
 package com.example.dungeon.model;
 
 public class Potion extends Item {
+    private static final String itemClassName = "зелье";
+
     private final int heal;
 
     public Potion(String name, int heal) {
         super(name);
         this.heal = heal;
+    }
+
+    @Override
+    public String getItemClassName() {
+        return itemClassName;
     }
 
     @Override

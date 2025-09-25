@@ -1,8 +1,35 @@
 package com.example.dungeon.model;
 
+import java.util.Objects;
+
 public class Key extends Item {
+    private static final String itemClassName = "ключ";
+
     public Key(String name) {
         super(name);
+    }
+
+    @Override
+    public final boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+
+        if (!(object instanceof Key key)) {
+            return false;
+        }
+
+        return Objects.equals(this.getName(), key.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getName());
+    }
+
+    @Override
+    public String getItemClassName() {
+        return itemClassName;
     }
 
     @Override

@@ -74,9 +74,12 @@ public class SaveLoad {
         }
         try (BufferedReader r = Files.newBufferedReader(SCORES)) {
             System.out.println("Таблица лидеров (топ-10):");
-            r.lines().skip(1).map(l -> l.split(",")).map(a -> new Score(a[1], Integer.parseInt(a[2])))
-                    .sorted(Comparator.comparingInt(Score::score).reversed()).limit(10)
-                    .forEach(s -> System.out.println(s.player() + " — " + s.score()));
+            r.lines().skip(1)
+                    .map(l -> l.split(","))
+                    .map(a -> new Score(a[1], Integer.parseInt(a[2])))
+                    .sorted(Comparator.comparingInt(Score::score).reversed())
+                    .limit(10)
+                    .forEach(s -> System.out.println(s.player() + " - " + s.score()));
         } catch (IOException e) {
             System.err.println("Ошибка чтения результатов: " + e.getMessage());
         }

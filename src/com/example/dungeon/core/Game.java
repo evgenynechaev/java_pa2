@@ -5,6 +5,8 @@ import com.example.dungeon.model.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 
 public class Game {
@@ -28,9 +30,7 @@ public class Game {
         commands.put("help", (ctx, a)
                 -> System.out.println("Команды: " + String.join(", ", commands.keySet())));
         commands.put("gc-stats", (ctx, a) -> {
-            Runtime rt = Runtime.getRuntime();
-            long free = rt.freeMemory(), total = rt.totalMemory(), used = total - free;
-            System.out.println("Память: used=" + used + " free=" + free + " total=" + total);
+            System.out.println(this.gcStats());
         });
         commands.put("look", (ctx, a)
                 -> System.out.println(ctx.getCurrent().describe()));
@@ -40,12 +40,13 @@ public class Game {
             if(a == null || a.isEmpty()) {
                 throw new InvalidCommandException("Не указано куда двигаться");
             }
-            Optional<Room> newRoom = Optional.ofNullable(ctx.getCurrent().getNeighbors().get(a.getFirst()));
-            if(newRoom.isEmpty()) {
+            Optional<Room> optNewRoom = Optional.ofNullable(ctx.getCurrent().getNeighbors().get(a.getFirst()));
+            if(optNewRoom.isEmpty()) {
                 throw new InvalidCommandException("Туда нет пути");
             }
 
-            Optional<Key> key = Optional.ofNullable(newRoom.get().getLocked());
+            Room newRoom = optNewRoom.get();
+            Optional<Key> key = Optional.ofNullable(newRoom.getLocked());
             if(key.isPresent()) {
                 if(state.getPlayer().getInventory().stream()
                         .filter(x -> x.getClass()
@@ -54,13 +55,13 @@ public class Game {
                         .noneMatch(x -> x.equals(key.get()))) {
                     throw new InvalidCommandException(
                             "Нет ключа от локации '"
-                                    + newRoom.get().getName()
+                                    + newRoom.getName()
                                     + "'. Найдите и возьмите ключ");
                 }
             }
 
-            state.setCurrent(newRoom.get());
-            System.out.println("Вы пришли:");
+            state.setCurrent(newRoom);
+            System.out.println("Вы перешли в: " + newRoom.getName());
             commands.get("look").execute(state, null);
         });
         commands.put("take", (ctx, a) -> {
@@ -159,7 +160,7 @@ public class Game {
         square.getItems().add(new Weapon("Меч", 15));
         square.getItems().add(new Potion("Большое-зелье", 15));
         forest.getItems().add(new Potion("Малое-зелье", 5));
-        forest.setMonster(new Monster("Волк", 50, 8,
+        forest.setMonster(new Monster("Волк", 10, 8,
                 new ArrayList<>(
                         List.of(new Key("Ключ-Пещера"),
                                 new Potion("Среднее-зелье", 10),
@@ -172,7 +173,7 @@ public class Game {
     }
 
     public void run() {
-        System.out.println("DungeonMini (TEMPLATE). 'help' — команды.");
+        System.out.println("DungeonMini (TEMPLATE). 'help' - команды.");
         try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
             while (true) {
                 System.out.print("> ");
@@ -202,5 +203,43 @@ public class Game {
         } catch (IOException e) {
             System.out.println("Ошибка ввода/вывода: " + e.getMessage());
         }
+    }
+
+    private String gcStats() {
+        Runtime rt = Runtime.getRuntime();
+        long beforeFree = rt.freeMemory();
+        long beforeTotal = rt.totalMemory();
+        StringBuilder sb = new StringBuilder();
+        sb.append("   До GC. Память: использованная=")
+                .append(this.humanReadableByteCountBin(beforeTotal - beforeFree))
+                .append(" свободная=")
+                .append(this.humanReadableByteCountBin(beforeFree))
+                .append(" общая=")
+                .append(this.humanReadableByteCountBin(beforeTotal));
+        System.gc();
+        long afterFree = rt.freeMemory();
+        long afterTotal = rt.totalMemory();
+        sb.append("\nПосле GC. Память: использованная=")
+                .append(this.humanReadableByteCountBin(afterTotal - afterFree))
+                .append(" свободная=")
+                .append(this.humanReadableByteCountBin(afterFree))
+                .append(" общая=")
+                .append(this.humanReadableByteCountBin(afterTotal));
+        return sb.toString();
+    }
+
+    private String humanReadableByteCountBin(long bytes) {
+        long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
+        if (absB < 1024) {
+            return bytes + " B";
+        }
+        long value = absB;
+        CharacterIterator ci = new StringCharacterIterator("KMGTPE");
+        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
+            value >>= 10;
+            ci.next();
+        }
+        value *= Long.signum(bytes);
+        return String.format("%.1f %cB", value / 1024.0, ci.current());
     }
 }

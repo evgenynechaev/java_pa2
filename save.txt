@@ -1,0 +1,3 @@
+player;Герой;15;20
+inventory;Key:Ключ-Лес,Key:Ключ-Пещера,Potion:Среднее-зелье,Weapon:Шпага
+room;Лес

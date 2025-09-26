@@ -174,7 +174,8 @@ public class Game {
 
     public void run() {
         System.out.println("DungeonMini (TEMPLATE). 'help' - команды.");
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(System.in, "cp" +
+                "866"))) {
             while (true) {
                 System.out.print("> ");
                 String line = in.readLine();

@@ -1,10 +1,13 @@
 C:\Projects\java_pa2\src\Main.java
 C:\Projects\java_pa2\src\com\example\dungeon\Main.java
+C:\Projects\java_pa2\src\com\example\dungeon\core\BytesToHumanInterface.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\Command.java
+C:\Projects\java_pa2\src\com\example\dungeon\core\Container.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\EndGameException.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\Game.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\InvalidCommandException.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\SaveLoad.java
+C:\Projects\java_pa2\src\com\example\dungeon\core\Utilities.java
 C:\Projects\java_pa2\src\com\example\dungeon\core\WorldInfo.java
 C:\Projects\java_pa2\src\com\example\dungeon\model\Entity.java
 C:\Projects\java_pa2\src\com\example\dungeon\model\GameState.java

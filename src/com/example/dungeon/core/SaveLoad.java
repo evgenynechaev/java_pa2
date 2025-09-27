@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 public class SaveLoad {
     private static final Path SAVE = Paths.get("save.txt");
+    private static final Path SAVE_SERIAL = Paths.get("save.game");
     private static final Path SCORES = Paths.get("scores.csv");
 
     public static void save(GameState s) {
@@ -24,6 +25,18 @@ public class SaveLoad {
             w.newLine();
             System.out.println("Сохранено в " + SAVE.toAbsolutePath());
             writeScore(p.getName(), s.getScore());
+        } catch (IOException e) {
+            throw new UncheckedIOException("Не удалось сохранить игру", e);
+        }
+    }
+
+    public static void saveSerializable(Container c) {
+
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(SAVE_SERIAL.toFile()))) {
+            oos.writeObject(c);
+            System.out.println("Сохранено в " + SAVE_SERIAL.toAbsolutePath());
+            Player p = c.getState().getPlayer();
+            writeScore(p.getName(), c.getState().getScore());
         } catch (IOException e) {
             throw new UncheckedIOException("Не удалось сохранить игру", e);
         }
@@ -64,6 +77,25 @@ public class SaveLoad {
             System.out.println("Игра загружена.");
         } catch (IOException e) {
             throw new UncheckedIOException("Не удалось загрузить игру", e);
+        }
+    }
+
+    public static void loadSerializable(Container current) {
+        if (!Files.exists(SAVE_SERIAL)) {
+            System.out.println("Сохранение не найдено.");
+            return;
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(SAVE_SERIAL.toFile()))) {
+            Container c = (Container) ois.readObject();
+            current.setRooms(c.getRooms());
+            current.setState(c.getState());
+            // current.getState().setCurrent();
+            System.out.println("Данные загружены");
+        } catch (IOException e) {
+            throw new UncheckedIOException("Не удалось загрузить игру", e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -1,8 +1,9 @@
 package com.example.dungeon.model;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Room {
+public class Room implements Serializable {
     private final String name;
     private final String description;
     private Key locked = null;

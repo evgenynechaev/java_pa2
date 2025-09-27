@@ -1,6 +1,8 @@
 package com.example.dungeon.model;
 
-public class GameState {
+import java.io.Serializable;
+
+public class GameState implements Serializable {
     private Player player;
     private Room current;
     private int score;
@@ -25,7 +27,12 @@ public class GameState {
         return score;
     }
 
+    public void setScore(int d) {
+        this.score = d;
+    }
+
     public void addScore(int d) {
         this.score += d;
     }
+
 }

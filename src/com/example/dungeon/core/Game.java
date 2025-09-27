@@ -2,11 +2,10 @@ package com.example.dungeon.core;
 
 import com.example.dungeon.model.*;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.*;
 
 public class Game {
@@ -29,104 +28,115 @@ public class Game {
                 -> System.out.println("Игра Dungeon Mini " + version));
         commands.put("help", (ctx, a)
                 -> System.out.println("Команды: " + String.join(", ", commands.keySet())));
-        commands.put("gc-stats", (ctx, a) -> {
-            System.out.println(this.gcStats());
-        });
+        commands.put("gc-stats", (ctx, a) -> System.out.println(this.gcStats()));
         commands.put("look", (ctx, a)
                 -> System.out.println(ctx.getCurrent().describe()));
         commands.put("self", (ctx, a)
                 -> System.out.println(ctx.getPlayer().describe()));
-        commands.put("move", (ctx, a) -> {
-            if(a == null || a.isEmpty()) {
-                throw new InvalidCommandException("Не указано куда двигаться");
-            }
-            Optional<Room> optNewRoom = Optional.ofNullable(ctx.getCurrent().getNeighbors().get(a.getFirst()));
-            if(optNewRoom.isEmpty()) {
-                throw new InvalidCommandException("Туда нет пути");
-            }
-
-            Room newRoom = optNewRoom.get();
-            Optional<Key> key = Optional.ofNullable(newRoom.getLocked());
-            if(key.isPresent()) {
-                if(state.getPlayer().getInventory().stream()
-                        .filter(x -> x.getClass()
-                                .getSimpleName()
-                                .equals(Key.class.getSimpleName()))
-                        .noneMatch(x -> x.equals(key.get()))) {
-                    throw new InvalidCommandException(
-                            "Нет ключа от локации '"
-                                    + newRoom.getName()
-                                    + "'. Найдите и возьмите ключ");
-                }
-            }
-
-            state.setCurrent(newRoom);
-            System.out.println("Вы перешли в: " + newRoom.getName());
-            commands.get("look").execute(state, null);
-        });
-        commands.put("take", (ctx, a) -> {
-            if(a == null || a.isEmpty()) {
-                throw new InvalidCommandException("Не указано что брать");
-            }
-            Optional<Item> item = ctx.getCurrent().getItems().stream()
-                    .filter(x -> x.getName().equalsIgnoreCase(a.getFirst())).findFirst();
-            if(item.isPresent()) {
-                state.getPlayer().setInventory(item.get());
-                ctx.getCurrent().getItems().remove(item.get());
-            }
-            else {
-                throw new InvalidCommandException("Нет такого предмета");
-            }
-        });
+        commands.put("move", this::move);
+        commands.put("take", this::take);
         commands.put("inventory", (ctx, a)
                 -> System.out.println(state.getPlayer().inventoryText()));
-        commands.put("use", (ctx, a) -> {
-            if(a == null || a.isEmpty()) {
-                throw new InvalidCommandException("Не указано что использовать");
-            }
-            Optional<Item> item = ctx.getPlayer().getInventory().stream()
-                    .filter(x -> x.getName().equalsIgnoreCase(a.getFirst())).findFirst();
-            if(item.isPresent()) {
-                item.get().apply(ctx);
-            }
-            else {
-                throw new InvalidCommandException("Нет такого предмета");
-            }
-        });
-        commands.put("fight", (ctx, a) -> {
-            Optional<Monster> optMonster = Optional.ofNullable(ctx.getCurrent().getMonster());
-            if(optMonster.isEmpty()) {
-                throw new InvalidCommandException("В этом месте нет монстра");
-            }
-
-            System.out.println("Битва");
-            Player player = ctx.getPlayer();
-            Monster monster = optMonster.get();
-
-            if(monster.getHp() <= 0) {
-                throw new InvalidCommandException("Монстр уже побежден!");
-            }
-
-            monster.takeHit(player.getAttack());
-            player.takeHit(monster.getLevel());
-
-            if(monster.getHp() <= 0) {
-                System.out.println("Монстр побежден!");
-                Optional<List<Item>> item = Optional.ofNullable(monster.getLoot());
-                player.setInventoryList(item.orElse(null));
-                monster.setLoot(null);
-            }
-        });
+        commands.put("use", this::use);
+        commands.put("fight", (ctx, a)
+                -> this.fight(ctx));
         commands.put("save", (ctx, a)
                 -> SaveLoad.save(ctx));
+        // commands.put("save2", (ctx, a)
+        //         -> SaveLoad.saveSerializable(new Container(ctx, this.rooms)));
         commands.put("load", (ctx, a)
                 -> SaveLoad.load(ctx, this.rooms));
+        // commands.put("load2", (ctx, a)
+        //         -> SaveLoad.loadSerializable(new Container(ctx, this.rooms)));
         commands.put("scores", (ctx, a)
                 -> SaveLoad.printScores());
         commands.put("exit", (ctx, a)
                 -> this.exit());
         commands.put("quit", (ctx, a)
                 -> this.exit());
+    }
+
+    private void move(GameState ctx, List<String> a) {
+        if(a == null || a.isEmpty()) {
+            throw new InvalidCommandException("Не указано куда двигаться");
+        }
+        Optional<Room> optNewRoom = Optional.ofNullable(ctx.getCurrent().getNeighbors().get(a.getFirst()));
+        if(optNewRoom.isEmpty()) {
+            throw new InvalidCommandException("Туда нет пути");
+        }
+
+        Room newRoom = optNewRoom.get();
+        Optional<Key> key = Optional.ofNullable(newRoom.getLocked());
+        if(key.isPresent()) {
+            if(state.getPlayer().getInventory().stream()
+                    .filter(x -> x.getClass()
+                            .getSimpleName()
+                            .equals(Key.class.getSimpleName()))
+                    .noneMatch(x -> x.equals(key.get()))) {
+                throw new InvalidCommandException(
+                        "Нет ключа от локации '"
+                                + newRoom.getName()
+                                + "'. Найдите и возьмите ключ");
+            }
+        }
+
+        state.setCurrent(newRoom);
+        System.out.println("Вы перешли в: " + newRoom.getName());
+        commands.get("look").execute(state, null);
+    }
+
+    private void take(GameState ctx, List<String> a) {
+        if(a == null || a.isEmpty()) {
+            throw new InvalidCommandException("Не указано что брать");
+        }
+        Optional<Item> item = ctx.getCurrent().getItems().stream()
+                .filter(x -> x.getName().equalsIgnoreCase(a.getFirst())).findFirst();
+        if(item.isPresent()) {
+            state.getPlayer().setInventory(item.get());
+            ctx.getCurrent().getItems().remove(item.get());
+        }
+        else {
+            throw new InvalidCommandException("Нет такого предмета");
+        }
+    }
+
+    private void use(GameState ctx, List<String> a) {
+        if(a == null || a.isEmpty()) {
+            throw new InvalidCommandException("Не указано что использовать");
+        }
+        Optional<Item> item = ctx.getPlayer().getInventory().stream()
+                .filter(x -> x.getName().equalsIgnoreCase(a.getFirst())).findFirst();
+        if(item.isPresent()) {
+            item.get().apply(ctx);
+        }
+        else {
+            throw new InvalidCommandException("Нет такого предмета");
+        }
+    }
+
+    private void fight(GameState ctx) {
+        Optional<Monster> optMonster = Optional.ofNullable(ctx.getCurrent().getMonster());
+        if(optMonster.isEmpty()) {
+            throw new InvalidCommandException("В этом месте нет монстра");
+        }
+
+        System.out.println("Битва");
+        Player player = ctx.getPlayer();
+        Monster monster = optMonster.get();
+
+        if(monster.getHp() <= 0) {
+            throw new InvalidCommandException("Монстр уже побежден!");
+        }
+
+        monster.takeHit(player.getAttack());
+        player.takeHit(monster.getLevel());
+
+        if(monster.getHp() <= 0) {
+            System.out.println("Монстр побежден!");
+            Optional<List<Item>> item = Optional.ofNullable(monster.getLoot());
+            player.setInventoryList(item.orElse(null));
+            monster.setLoot(null);
+        }
     }
 
     private void exit() {
@@ -193,6 +203,7 @@ public class Game {
                     System.out.println("Ошибка: " + e.getMessage());
                 } catch (EndGameException e) {
                     System.out.println(e.getMessage());
+                    in.readLine();
                     this.exit();
                 } catch (Exception e) {
                     System.out.println("Непредвиденная ошибка: "
@@ -206,28 +217,30 @@ public class Game {
     }
 
     private String gcStats() {
+        Utilities util = new Utilities();
         Runtime rt = Runtime.getRuntime();
         long beforeFree = rt.freeMemory();
         long beforeTotal = rt.totalMemory();
         StringBuilder sb = new StringBuilder();
         sb.append("   До GC. Память: использованная=")
-                .append(this.humanReadableByteCountBin(beforeTotal - beforeFree))
+                .append(util.bytesToHuman.convert(beforeTotal - beforeFree))
                 .append(" свободная=")
-                .append(this.humanReadableByteCountBin(beforeFree))
+                .append(util.bytesToHuman.convert(beforeFree))
                 .append(" общая=")
-                .append(this.humanReadableByteCountBin(beforeTotal));
+                .append(util.bytesToHuman.convert(beforeTotal));
         System.gc();
         long afterFree = rt.freeMemory();
         long afterTotal = rt.totalMemory();
         sb.append("\nПосле GC. Память: использованная=")
-                .append(this.humanReadableByteCountBin(afterTotal - afterFree))
+                .append(util.bytesToHuman.convert(afterTotal - afterFree))
                 .append(" свободная=")
-                .append(this.humanReadableByteCountBin(afterFree))
+                .append(util.bytesToHuman.convert(afterFree))
                 .append(" общая=")
-                .append(this.humanReadableByteCountBin(afterTotal));
+                .append(util.bytesToHuman.convert(afterTotal));
         return sb.toString();
     }
 
+    /*
     private String humanReadableByteCountBin(long bytes) {
         long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absB < 1024) {
@@ -242,4 +255,5 @@ public class Game {
         value *= Long.signum(bytes);
         return String.format("%.1f %cB", value / 1024.0, ci.current());
     }
+    */
 }

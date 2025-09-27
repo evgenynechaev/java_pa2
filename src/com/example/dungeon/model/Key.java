@@ -1,8 +1,9 @@
 package com.example.dungeon.model;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Key extends Item {
+public class Key extends Item implements Serializable {
     private static final String itemClassName = "ключ";
 
     public Key(String name) {

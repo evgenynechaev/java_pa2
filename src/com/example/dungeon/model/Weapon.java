@@ -1,6 +1,8 @@
 package com.example.dungeon.model;
 
-public class Weapon extends Item {
+import java.io.Serializable;
+
+public class Weapon extends Item implements Serializable {
     private static final String itemClassName = "оружие";
 
     private final int bonus;

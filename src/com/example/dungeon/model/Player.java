@@ -2,10 +2,11 @@ package com.example.dungeon.model;
 
 import com.example.dungeon.core.EndGameException;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Player extends Entity {
+public class Player extends Entity implements Serializable {
     private int attack;
     private final List<Item> inventory = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public class Player extends Entity {
         super.takeHit(power);
         System.out.printf("Монстр бьете вас на %d. Ваше HP: %d\n", power, this.getHp());
         if(this.getHp() <= 0) {
-            throw new EndGameException("\nИгрок погиб! Игра завершена.");
+            throw new EndGameException("\nИгрок погиб! Игра завершена. Нажмите [Ввод]");
         }
     }
 }

@@ -2,9 +2,10 @@ package com.example.dungeon.model;
 
 import com.example.dungeon.core.InvalidCommandException;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Monster extends Entity {
+public class Monster extends Entity implements Serializable {
     private int level;
     private List<Item> loot;
 

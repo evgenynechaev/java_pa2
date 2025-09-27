@@ -1,6 +1,8 @@
 package com.example.dungeon.model;
 
-public abstract class Item {
+import java.io.Serializable;
+
+public abstract class Item implements Serializable {
     private final String name;
 
     protected Item(String name) {

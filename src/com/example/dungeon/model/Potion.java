@@ -1,6 +1,8 @@
 package com.example.dungeon.model;
 
-public class Potion extends Item {
+import java.io.Serializable;
+
+public class Potion extends Item implements Serializable {
     private static final String itemClassName = "зелье";
 
     private final int heal;

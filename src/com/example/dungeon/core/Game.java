@@ -12,7 +12,8 @@ public class Game {
     private final String version = "v.1.0";
     private final GameState state = new GameState();
     private final Map<String, Command> commands = new LinkedHashMap<>();
-    private List<Room> rooms = new ArrayList<>();
+    // private List<Room> rooms = new ArrayList<>();
+    private final Map<String, Room> rooms = new HashMap<>();
 
     static {
         WorldInfo.touch("Game");
@@ -38,16 +39,15 @@ public class Game {
         commands.put("inventory", (ctx, a)
                 -> System.out.println(state.getPlayer().inventoryText()));
         commands.put("use", this::use);
-        commands.put("fight", (ctx, a)
-                -> this.fight(ctx));
+        commands.put("fight", this::fight);
+        // commands.put("save", (ctx, a)
+        //         -> SaveLoad.save(ctx));
         commands.put("save", (ctx, a)
-                -> SaveLoad.save(ctx));
-        // commands.put("save2", (ctx, a)
-        //         -> SaveLoad.saveSerializable(new Container(ctx, this.rooms)));
+                -> SaveLoad.saveSerializable(new Container(ctx, this.rooms, ctx.getCurrent().getName())));
+        // commands.put("load", (ctx, a)
+        //         -> SaveLoad.load(ctx, this.rooms));
         commands.put("load", (ctx, a)
-                -> SaveLoad.load(ctx, this.rooms));
-        // commands.put("load2", (ctx, a)
-        //         -> SaveLoad.loadSerializable(new Container(ctx, this.rooms)));
+                -> SaveLoad.loadSerializable(new Container(ctx, this.rooms, ctx.getCurrent().getName())));
         commands.put("scores", (ctx, a)
                 -> SaveLoad.printScores());
         commands.put("exit", (ctx, a)
@@ -114,7 +114,7 @@ public class Game {
         }
     }
 
-    private void fight(GameState ctx) {
+    private void fight(GameState ctx, List<String> a) {
         Optional<Monster> optMonster = Optional.ofNullable(ctx.getCurrent().getMonster());
         if(optMonster.isEmpty()) {
             throw new InvalidCommandException("В этом месте нет монстра");
@@ -145,7 +145,20 @@ public class Game {
     }
 
     private void bootstrapWorld() {
-        Player hero = new Player("Герой", 20, 5);
+        String heroName = "Герой";
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.printf("Введите имя игрока (%s): ", heroName);
+            String line = scanner.nextLine();
+            if (line == null) continue;
+            String name = line.trim();
+            if (name.isEmpty()) {
+                break;
+            }
+            heroName = name;
+            break;
+        }
+        Player hero = new Player(heroName, 30, 5);
         // hero.setInventory(new Key("Ключ-серебряный"));
         // hero.setInventory(new Key("Ключ-Лес"));
         // hero.setInventory(new Weapon("Меч-кладенец", 20));
@@ -157,7 +170,6 @@ public class Game {
         Room forest = new Room("Лес", "Шелест листвы и птичий щебет.", new Key("Ключ-Лес"));
         Room cave = new Room("Пещера", "Темно и сыро.", new Key("Ключ-Пещера"));
         Room castle = new Room("Замок", "Королевский дворец.", new Key("Ключ-Замок"));
-        this.rooms = new ArrayList<>(List.of(square, forest, cave, castle));
 
         square.getNeighbors().put("north", forest);
         square.getNeighbors().put("west", castle);
@@ -178,6 +190,11 @@ public class Game {
                 )
         ));
         cave.getItems().add(new Key("Ключ-Замок"));
+
+        this.rooms.put(square.getName(), square);
+        this.rooms.put(forest.getName(), forest);
+        this.rooms.put(cave.getName(), cave);
+        this.rooms.put(castle.getName(), castle);
 
         state.setCurrent(square);
     }
@@ -239,21 +256,4 @@ public class Game {
                 .append(util.bytesToHuman.convert(afterTotal));
         return sb.toString();
     }
-
-    /*
-    private String humanReadableByteCountBin(long bytes) {
-        long absB = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
-        if (absB < 1024) {
-            return bytes + " B";
-        }
-        long value = absB;
-        CharacterIterator ci = new StringCharacterIterator("KMGTPE");
-        for (int i = 40; i >= 0 && absB > 0xfffccccccccccccL >> i; i -= 10) {
-            value >>= 10;
-            ci.next();
-        }
-        value *= Long.signum(bytes);
-        return String.format("%.1f %cB", value / 1024.0, ci.current());
-    }
-    */
 }

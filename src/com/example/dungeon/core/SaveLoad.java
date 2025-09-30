@@ -13,6 +13,7 @@ public class SaveLoad {
     private static final Path SAVE_SERIAL = Paths.get("save.game");
     private static final Path SCORES = Paths.get("scores.csv");
 
+    /*
     public static void save(GameState s) {
         try (BufferedWriter w = Files.newBufferedWriter(SAVE)) {
             Player p = s.getPlayer();
@@ -29,6 +30,7 @@ public class SaveLoad {
             throw new UncheckedIOException("Не удалось сохранить игру", e);
         }
     }
+    */
 
     public static void saveSerializable(Container c) {
 
@@ -42,7 +44,8 @@ public class SaveLoad {
         }
     }
 
-    public static void load(GameState s, List<Room> rooms) {
+    /*
+    public static void load(GameState s, Map<String, Room> rooms) {
         if (!Files.exists(SAVE)) {
             System.out.println("Сохранение не найдено.");
             return;
@@ -72,13 +75,14 @@ public class SaveLoad {
                 }
             }
             String roomName = map.getOrDefault("room", "Площадь");
-            Optional<Room> room = rooms.stream().filter(x -> x.getName().equalsIgnoreCase(roomName)).findFirst();
+            Optional<Room> room = Optional.ofNullable(rooms.get(roomName));
             room.ifPresent(s::setCurrent);
             System.out.println("Игра загружена.");
         } catch (IOException e) {
             throw new UncheckedIOException("Не удалось загрузить игру", e);
         }
     }
+    */
 
     public static void loadSerializable(Container current) {
         if (!Files.exists(SAVE_SERIAL)) {
@@ -87,10 +91,27 @@ public class SaveLoad {
         }
 
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(SAVE_SERIAL.toFile()))) {
-            Container c = (Container) ois.readObject();
-            current.setRooms(c.getRooms());
-            current.setState(c.getState());
-            // current.getState().setCurrent();
+            Container loadedContainer = (Container) ois.readObject();
+            Map<String, Room> loadedRooms = loadedContainer.getRooms();
+
+            Map<String, Room> currentRooms = current.getRooms();
+            loadedRooms.forEach((key, value) -> {
+                Room room = currentRooms.get(key);
+                if(room == null) {
+                    return;
+                }
+                room.setLocked(value.getLocked());
+                room.getItems().clear();
+                room.getItems().addAll(value.getItems());
+                room.getNeighbors().clear();
+                room.getNeighbors().putAll(value.getNeighbors());
+                room.setMonster(value.getMonster());
+            });
+
+            GameState currentState = current.getState();
+            currentState.setCurrent(currentRooms.get(loadedContainer.getCurrentRoom()));
+            currentState.setPlayer(loadedContainer.getState().getPlayer());
+
             System.out.println("Данные загружены");
         } catch (IOException e) {
             throw new UncheckedIOException("Не удалось загрузить игру", e);

@@ -20,6 +20,15 @@ public class Monster extends Entity implements Serializable {
         this.loot = loot;
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("Monster '%s', уровень: %d",
+                super.toString(),
+                this.level);
+    }
+    */
+
     public int getLevel() {
         return level;
     }

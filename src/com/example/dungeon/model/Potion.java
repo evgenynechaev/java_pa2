@@ -12,6 +12,15 @@ public class Potion extends Item implements Serializable {
         this.heal = heal;
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("Зелье '%s', heal: %d",
+                super.toString(),
+                this.heal);
+    }
+    */
+
     @Override
     public String getItemClassName() {
         return itemClassName;

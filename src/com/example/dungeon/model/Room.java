@@ -22,6 +22,23 @@ public class Room implements Serializable {
         this.locked = locked;
     }
 
+    /*
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Локация ")
+                .append(this.name)
+                .append("\nописание: ")
+                .append(this.description);
+        sb.append("\nПредметы:");
+        items.forEach(item -> sb.append("\n").append(item.toString()));
+        sb.append("\nСоседи: ");
+        neighbors.forEach((key, value) -> sb.append("\n").append(key).append(" ").append(value.getName()));
+        sb.append("\nМонстр: ").append(monster == null ? "нет" : monster.getName());
+        return sb.toString();
+    }
+    */
+
     public String getName() {
         return name;
     }
@@ -41,6 +58,12 @@ public class Room implements Serializable {
     public List<Item> getItems() {
         return items;
     }
+
+    /*
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+    */
 
     public Monster getMonster() {
         return monster;

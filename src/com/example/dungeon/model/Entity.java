@@ -11,6 +11,15 @@ public abstract class Entity implements Serializable {
         this.hp = hp;
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("name: %s, hp: %d",
+                this.name,
+                this.hp);
+    }
+    */
+
     public String getName() {
         return name;
     }

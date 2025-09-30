@@ -12,6 +12,15 @@ public class Weapon extends Item implements Serializable {
         this.bonus = bonus;
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("Оружие '%s', bonus: %d",
+                super.toString(),
+                this.bonus);
+    }
+    */
+
     @Override
     public String getItemClassName() {
         return itemClassName;

@@ -10,6 +10,14 @@ public class Key extends Item implements Serializable {
         super(name);
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("Ключ '%s'",
+                super.toString());
+    }
+    */
+
     @Override
     public final boolean equals(Object object) {
         if (this == object) {

@@ -15,6 +15,15 @@ public class Player extends Entity implements Serializable {
         this.attack = attack;
     }
 
+    /*
+    @Override
+    public String toString() {
+        return String.format("Player '%s', атака: %d",
+                super.toString(),
+                this.attack);
+    }
+    */
+
     public int getAttack() {
         return attack;
     }

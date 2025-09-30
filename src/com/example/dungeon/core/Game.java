@@ -12,7 +12,6 @@ public class Game {
     private final String version = "v.1.0";
     private final GameState state = new GameState();
     private final Map<String, Command> commands = new LinkedHashMap<>();
-    // private List<Room> rooms = new ArrayList<>();
     private final Map<String, Room> rooms = new HashMap<>();
 
     static {
